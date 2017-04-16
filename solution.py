@@ -29,6 +29,18 @@ def naked_twins(values):
 
     # Find all instances of naked twins
     # Eliminate the naked twins as possibilities for their peers
+    for unit in unitlist:
+        twins_dict = {}
+        for box in unit:
+            if len(values[box]) == 2:
+                twins_dict.setdefault(values[box], set()).add(box)
+        for t_digits, t_boxes in twins_dict.items():
+            if len(t_boxes) == 2:
+                other_boxes = [box for box in unit if box not in t_boxes]
+                for digit in t_digits:
+                    for box in other_boxes:
+                        values[box] = values[box].replace(digit, '')
+    return values
 
 def cross(A, B):
     "Cross product of elements in A and elements in B."
@@ -67,6 +79,13 @@ def display(values):
     return
 
 def eliminate(values):
+    """Eliminate values from peers of each box with a single value.
+
+    Args:
+        values: Sudoku in dictionary form.
+    Returns:
+        Resulting Sudoku in dictionary form after eliminating values.
+    """
     for k, v in values.items():
         if len(v) == 1:
             for peer in peers[k]:
@@ -74,19 +93,31 @@ def eliminate(values):
     return values
 
 def only_choice(values):
+    """Finalize all values that are the only choice for a unit.
+
+    Go through all the units, and whenever there is a unit with a value
+    that only fits in one box, assign the value to this box.
+
+    Input: Sudoku in dictionary form.
+    Output: Resulting Sudoku in dictionary form after filling in only choices.
+    """
     for unit in unitlist:
         for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
+            if len(dplaces) == 1:
+                values[dplaces[0]] = digit
+    return values
 
 def reduce_puzzle(values):
     stalled = False
     while not stalled:
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
-        eliminate(values)
-        only_choice(values)
-        # TODO naked_twins strategy
+        values = eliminate(values)
+        values = only_choice(values)
+        values = naked_twins(values)
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         stalled = solved_values_before == solved_values_after
+        # Sanity check
         if len([box for box in values.keys() if len(values[box]) == 0]):
             return False
     return values
@@ -97,6 +128,7 @@ def search(values):
         return False ## Failed earlier
     if all(len(values[s]) == 1 for s in boxes): 
         return values ## Solved!
+    # Pick box with minimum potential values
     _,s = min((len(values[s]), s) for s in boxes if len(values[s]) > 1)
     for value in values[s]:
         new_sudoku = values.copy()
