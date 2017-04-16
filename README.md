@@ -3,11 +3,11 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?  
-A: *Student should provide answer here*
+A: In `reduce_puzzle`, as we process the puzzle's state in the `values` dictionary, we can add a new strategy for the Naked Twins approach besides the original ones: `eliminate` and `only_choice`. In other words, `values` is now processed through 3 sets of constraint strategies: first the *eliminate* strategy, second the the *only choice* strategy, and finally the (new) *naked twins* strategy. Each strategy may produce a new (more constrained) puzzle state, which in turn is fed to the following strategy in the chain. This process is called *constraint propagation*. To arrive to a solution, we iterate through this process until the puzzle cannot be constrained any further.
 
 # Question 2 (Diagonal Sudoku)
 Q: How do we use constraint propagation to solve the diagonal sudoku problem?  
-A: *Student should provide answer here*
+A: At the beginning of the solution, we build a `list` called `unitlist` that contains the sudoku units for which the constraint strategies are applied. Originally, this list was made up of the traditional sudoku units (`row_units + column_units + square_units`). In order to support diagonal sudoku, we just need to update this list with the *diagonal sudoku* list, resulting in `row_units + column_units + square_units + diag_units` (Note: the diagonal sudoku list is simply made up of the sudoku boxes that make up the 2 diagonal lines crossing the sudoku grid). With such change, since the `unitlist` is used by each one of our already implemented constraint strategies (*elimination*, *only choice*, and *naked twins*), effectively we end up incorporating diagonal sudoku rules into our constraints. 
 
 ### Install
 
